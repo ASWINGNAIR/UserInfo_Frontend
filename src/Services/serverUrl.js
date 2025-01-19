@@ -1,0 +1,1 @@
+export const serverUrl='https://userinfo-server-sj25.onrender.com'
