@@ -7,20 +7,21 @@ import Modal from 'react-bootstrap/Modal';
 import { deleteDataApi, editDataApi, getDataApi } from '../Services/allApi';
 
 
-function Home({datas}) {
+function Home({ datas }) {
 
   const [show, setShow] = useState(false);
 
-  const [addData,setAddData] = useState([])
+  const [addData, setAddData] = useState([])
 
-  const [deleteStatus , setDeleteStatus] = useState({})
+  const [deleteStatus, setDeleteStatus] = useState({})
 
-  const [editData ,setEditData] = useState({})
-  
+  const [editData, setEditData] = useState({})
+
   const [updateStatus, setUpdateStatus] = useState(false);
-  
+
 
   const handleClose = () => setShow(false);
+
   const handleShow = (item) => {
     setEditData({
       id: item.id,
@@ -32,38 +33,62 @@ function Home({datas}) {
   };
 
   console.log(editData);
-  
 
-  const getData = async()=>{
+
+  const getData = async () => {
     const result = await getDataApi()
     setAddData(result.data)
   }
   console.log(addData);
-  
 
-  const handleDelete = async(id) =>{
-    const result = await deleteDataApi(id)
-    console.log(result);
-    
-    if(result.status>=200 && result.status<300){
-      setDeleteStatus(result)
+
+  const handleDelete = async (id) => {
+    try {
+      const result = await deleteDataApi(id)
+      console.log(result);
+
+      if (result.status >= 200 && result.status < 300) {
+        alert('Data deleted successfully');
+        setDeleteStatus(result)
+      }
+    } catch (error) {
+      alert('An error occurred while deleting data');
     }
   }
-  
-const handleUpdate = async () => {
-  const result = await editDataApi(editData.id, editData)
-  if (result.status >= 200 && result.status < 300) {
-    alert('Data updated successfully')
-    setUpdateStatus(result)
-    handleClose()
-  } else {
-    alert('Failed to update data')
+
+
+  const handleUpdate = async () => {
+    const { username, emailId, mobile } = editData
+
+    if (!username || !emailId || !mobile) {
+      alert('Please fill the form completely')
+    }
+    else if (!/^[0-9]{10}$/.test(mobile)) {
+      alert('Please insert valid Mobile Number')
+    }
+    else if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(emailId)) {
+      alert('Please insert a valid Email Id')
+    }
+    else if (!/^[a-zA-Z\s]+$/.test(username)) {
+      alert('Please insert a valid Username')
+    }
+    else {
+      const result = await editDataApi(editData.id, editData)
+
+      if (result.status >= 200 && result.status < 300) {
+        alert('Data updated successfully')
+        setUpdateStatus(result)
+        handleClose()
+      }
+      else {
+        alert('Failed to update data')
+      }
+    }
   }
-}
-  
+
   useEffect(() => {
     getData()
-  }, [deleteStatus , updateStatus]);
+  }, [deleteStatus, updateStatus]);
 
   return (
     <>
@@ -83,36 +108,36 @@ const handleUpdate = async () => {
           </thead>
           <tbody>
 
-          {addData?.map((item,index)=>(
-            <tr className="text-center" key={item.id}>
-            <td>{index+1}</td>
-            <td>{item?.username}</td>
-            <td>{item?.emailId}</td>
-            <td>{item?.mobile}</td>
-            <td><Button variant="primary" onClick={() => handleShow(item)}><FontAwesomeIcon icon={faPenToSquare} /></Button>
-              <Modal show={show} onHide={handleClose} animation={false}>
-                <Modal.Header closeButton>
-                  <Modal.Title>Edit Your Details</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                  <input onChange={(e) => setEditData({ ...editData, username: e.target.value })} value={editData.username} type="text" className='form-control mt-2' placeholder='Name' /> 
-                  <input onChange={(e) => setEditData({ ...editData, emailId: e.target.value })} value={editData.emailId} type="text" className='form-control mt-2' placeholder='Email' />
-                  <input onChange={(e) => setEditData({ ...editData, mobile: e.target.value }) } value={editData.mobile} type="text" className='form-control mt-2' placeholder='Mobile' />
-                </Modal.Body>
-                <Modal.Footer>
-                  <Button variant="secondary" onClick={handleClose}>
-                    Cancel
-                  </Button>
-                  <Button variant="primary" onClick={handleUpdate} >
-                    Save Changes
-                  </Button>
-                </Modal.Footer>
-              </Modal></td>
-            <td><button ><FontAwesomeIcon icon={faTrashCan} onClick={()=>handleDelete(item?.id)} /></button> </td>
-          </tr>
-           ))
-            
-          } 
+            {addData?.map((item, index) => (
+              <tr className="text-center" key={item.id}>
+                <td>{index + 1}</td>
+                <td>{item?.username}</td>
+                <td>{item?.emailId}</td>
+                <td>{item?.mobile}</td>
+                <td><Button variant="primary" onClick={() => handleShow(item)}><FontAwesomeIcon icon={faPenToSquare} /></Button>
+                  <Modal show={show} onHide={handleClose} animation={false}>
+                    <Modal.Header closeButton>
+                      <Modal.Title>Edit Your Details</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                      <input onChange={(e) => setEditData({ ...editData, username: e.target.value })} value={editData.username} type="text" className='form-control mt-2' placeholder='Name' />
+                      <input onChange={(e) => setEditData({ ...editData, emailId: e.target.value })} value={editData.emailId} type="text" className='form-control mt-2' placeholder='Email' />
+                      <input onChange={(e) => setEditData({ ...editData, mobile: e.target.value })} value={editData.mobile} type="text" className='form-control mt-2' placeholder='Mobile' />
+                    </Modal.Body>
+                    <Modal.Footer>
+                      <Button variant="secondary" onClick={handleClose}>
+                        Cancel
+                      </Button>
+                      <Button variant="primary" onClick={handleUpdate} >
+                        Save Changes
+                      </Button>
+                    </Modal.Footer>
+                  </Modal></td>
+                <td><button ><FontAwesomeIcon icon={faTrashCan} onClick={() => handleDelete(item?.id)} /></button> </td>
+              </tr>
+            ))
+
+            }
 
           </tbody>
         </Table>
